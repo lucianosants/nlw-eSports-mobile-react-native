@@ -6,17 +6,18 @@ import { Entypo } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { GameParams } from '../../@types/navigation';
 
-
-import logoImage from '../../assets/logo-nlw-esports.png';
 import { Background } from '../../components/Background';
 import { Heading } from '../../components/Heading';
+import { DuoCard, DuoCardProps } from '../../components/DuoCard';
+import { DuoMatch } from '../../components/DuoMatch';
 
+import logoImage from '../../assets/logo-nlw-esports.png';
 import { styles } from './styles';
 import { THEME } from '../../theme';
-import { DuoCard, DuoCardProps } from '../../components/DuoCard';
 
 export function Game() {
     const [duos, setDuos] = useState<DuoCardProps[]>([]);
+    const [discordDuoSelected, setDiscordDuoSelected] = useState('');
 
     const navigation = useNavigation();
     const route = useRoute();
@@ -24,6 +25,14 @@ export function Game() {
 
     const handleBack = () => {
         navigation.goBack();
+    };
+
+    const getDiscordUser = async (adsId: string) => {
+        fetch(`http://192.168.0.101:3333/ads/${adsId}/discord`)
+            .then(response => response.json())
+            .then(data => {
+                setDiscordDuoSelected(data.discord)
+            });
     };
 
     useEffect(() => {
@@ -70,7 +79,7 @@ export function Game() {
                     renderItem={({ item }) => (
                         <DuoCard
                             data={item}
-                            onConnect={() => { }}
+                            onConnect={() => getDiscordUser(item.id)}
                         />
                     )}
                     horizontal
@@ -84,7 +93,11 @@ export function Game() {
                     )}
                 />
 
-
+                <DuoMatch
+                    onClose={() => setDiscordDuoSelected('')}
+                    visible={discordDuoSelected.length > 0}
+                    discord={discordDuoSelected}
+                />
             </SafeAreaView>
         </Background>
     );
